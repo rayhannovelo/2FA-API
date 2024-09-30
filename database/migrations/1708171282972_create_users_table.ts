@@ -22,11 +22,10 @@ export default class extends BaseSchema {
         .onUpdate('CASCADE')
       table.string('username').notNullable().unique()
       table.string('password')
-      table.string('name')
+      table.string('name').notNullable()
       table.string('photo')
       table.string('email').unique()
       table.timestamp('email_verified_at')
-
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

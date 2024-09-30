@@ -14,7 +14,7 @@
 
 import { Bouncer, AuthorizationResponse } from '@adonisjs/bouncer'
 import User from '#models/user'
-import { ADMIN, USER } from '#constants/user_role_constants'
+import { ADMIN, TWO_FA_APP, AUTHENTICATOR } from '#constants/user_role_constants'
 
 export const manageUser = Bouncer.ability((user: User) => {
   const allowUserRole = [ADMIN]
@@ -26,8 +26,8 @@ export const manageUser = Bouncer.ability((user: User) => {
   return AuthorizationResponse.deny('Unauthorized action', 403)
 })
 
-export const managePost = Bouncer.ability((user: User) => {
-  const allowUserRole = [ADMIN, USER]
+export const manage2FA = Bouncer.ability((user: User) => {
+  const allowUserRole = [ADMIN, TWO_FA_APP]
 
   if (allowUserRole.includes(user.userRoleId)) {
     return true

@@ -8,7 +8,6 @@ export default class extends BaseSchema {
       table.increments('id')
       table.string('user_role_name').notNullable()
       table.text('user_role_description')
-
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })
