@@ -1,17 +1,14 @@
-# Project Name: AdonisJS 6 Rest API
+# 2FA (Two-Factor Authentication) Project with AdonisJS 6
 
-## Description:
-This project is an example of implementing key features in AdonisJS 6 for REST API with Access Tokens as its auth guard.
+This project implements a Two-Factor Authentication (2FA) system using AdonisJS 6. It includes functionalities such as generating and verifying OTPs (One-Time Passwords) via TOTP (Time-based One-Time Password), QR code generation, and user authentication.
 
-## Features:
-- **User Authentication (Access Token)**: adding features for login, logout, manage profile using token, and refresh token
-- **User Authorization (Bouncer)**: adding user abilities and post policies
-- **Database (Lucid)**: implementing migration, seeder, and relationship model
-- **Validation (VineJS)**: adding custom rules for exists and unique
-- **Middleware**: implementing auth and bouncer middleware
-- **Exception Handling**: adding handling errors for route not found, unauthorized access, unauthorized action (Bouncer), validation error (VineJS), custom database error (Lucid)
-- **CRUD Examples**: users, user roles, user statuses and posts
-- **Others**: add global helper, add global constants, and add uploaded file route
+## Features
+
+- User Login
+- Two-Factor Authentication (2FA) via OTP (TOTP)
+- QR Code Generation for OTP Setup
+- OTP Validation
+- Integration with Google Authenticator or similar apps
 
 ## Requirements:
 - **Node.js** >= 20.6
