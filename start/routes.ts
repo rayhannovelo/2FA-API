@@ -68,8 +68,8 @@ router
 
         router
           .group(() => {
-            router.get('/2fa/generate_qr', [TwoFaController, 'index'])
-            router.post('/2fa/verify', [TwoFaController, 'index'])
+            router.get('/2fa/generate-qr', [TwoFaController, 'index'])
+            router.post('/2fa/verify-token', [TwoFaController, 'verifyToken'])
           })
           .use(middleware.bouncer(manage2FA))
       })

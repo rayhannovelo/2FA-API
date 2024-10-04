@@ -4,13 +4,13 @@ import vine from '@vinejs/vine'
 import { authenticator } from '@otplib/preset-default'
 import { generateQRCode } from '#helpers/main'
 import TwoFa from '#models/two_fa'
+import { existsRule } from '#rules/exists'
 
 export default class TwoFaController extends BaseController {
   /**
    * Display a list of resource
    */
   async index({ auth, request }: HttpContext) {
-    // validate
     const validator = vine.compile(
       vine.object({
         user: vine.string(),
@@ -28,19 +28,39 @@ export default class TwoFaController extends BaseController {
 
     // set otp & qrcode
     const otpauth = authenticator.keyuri(user, service, secret)
-    const generateQR = await generateQRCode(otpauth)
+    const qrCode = await generateQRCode(otpauth)
 
     // generate token
     const token = authenticator.generate(secret)
 
     // save
-    await TwoFa.create({ userAppId: userApp.id, user, service, secret, token })
+    const data = await TwoFa.create({ userAppId: userApp.id, user, service, secret, token })
+    console.log(data.referenceId)
 
-    // verify token
-    const isValid = authenticator.verify({ token, secret })
-
-    this.response('User role created successfully', { secret, otpauth, generateQR, token, isValid })
+    this.response('User role created successfully', {
+      referenceId: data.referenceId,
+      qrCode,
+    })
   }
 
-  async verify({}: HttpContext) {}
+  async verifyToken({ request }: HttpContext) {
+    const payload = request.body()
+    const validator = vine.compile(
+      vine.object({
+        referenceId: vine
+          .string()
+          .uuid({ version: [4] })
+          .use(existsRule({ table: '2fas', column: 'reference_id' })),
+        token: vine.string(),
+      })
+    )
+    const output = await validator.validate(payload)
+
+    const data = await TwoFa.findByOrFail('reference_id', output.referenceId)
+
+    // verify token
+    const isValid = authenticator.verify({ token: output.token, secret: data!.secret })
+
+    this.response('Token verified successfully', { isValid })
+  }
 }
