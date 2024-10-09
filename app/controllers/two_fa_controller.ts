@@ -5,6 +5,8 @@ import { authenticator } from '@otplib/preset-default'
 import { generateQRCode } from '#helpers/main'
 import TwoFa from '#models/two_fa'
 import { existsRule } from '#rules/exists'
+import { DateTime } from 'luxon'
+import TwoFaLog from '#models/two_fa_log'
 
 export default class TwoFaController extends BaseController {
   /**
@@ -30,15 +32,11 @@ export default class TwoFaController extends BaseController {
     const otpauth = authenticator.keyuri(user, service, secret)
     const qrCode = await generateQRCode(otpauth)
 
-    // generate token
-    const token = authenticator.generate(secret)
-
-    // save
-    const data = await TwoFa.create({ userAppId: userApp.id, user, service, secret, token })
-    console.log(data.referenceId)
+    // save to database
+    const twoFa = await TwoFa.create({ userAppId: userApp.id, user, service, secret })
 
     this.response('User role created successfully', {
-      referenceId: data.referenceId,
+      referenceId: twoFa.referenceId,
       qrCode,
     })
   }
@@ -56,10 +54,21 @@ export default class TwoFaController extends BaseController {
     )
     const output = await validator.validate(payload)
 
-    const data = await TwoFa.findByOrFail('reference_id', output.referenceId)
+    // get 2fa
+    const twoFa = await TwoFa.findByOrFail('reference_id', output.referenceId)
 
     // verify token
-    const isValid = authenticator.verify({ token: output.token, secret: data!.secret })
+    const isValid = authenticator.verify({ token: output.token, secret: twoFa!.secret })
+
+    // save verified timestamp
+    if (isValid) {
+      twoFa.lastVerifiedAt = DateTime.local()
+
+      await twoFa.save()
+    }
+
+    // save 2fa logs
+    await TwoFaLog.create({ twoFaId: twoFa.id, isValid })
 
     this.response('Token verified successfully', { isValid })
   }

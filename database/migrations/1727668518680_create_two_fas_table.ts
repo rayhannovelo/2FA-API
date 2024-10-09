@@ -17,9 +17,10 @@ export default class extends BaseSchema {
       table.string('user').notNullable()
       table.string('service').notNullable()
       table.string('secret').notNullable()
-      table.string('token')
+      table.timestamp('last_verified_at').nullable()
       table.timestamp('created_at')
       table.timestamp('updated_at')
+      table.index(['reference_id'], 'reference_id_index')
     })
 
     this.schema.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')

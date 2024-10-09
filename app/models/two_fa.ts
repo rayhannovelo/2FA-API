@@ -25,8 +25,12 @@ export default class TwoFa extends BaseModel {
   @column()
   declare secret: string
 
-  @column()
-  declare token: string | null
+  @column.dateTime({
+    serialize: (value: DateTime | null) => {
+      return value ? value.toFormat('yyyy-MM-dd HH:mm:ss') : value
+    },
+  })
+  declare lastVerifiedAt: DateTime | null
 
   @column.dateTime({
     autoCreate: true,
