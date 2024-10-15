@@ -28,12 +28,14 @@ export default class TwoFaController extends BaseController {
     const service = `${userApp.name} 2FA`
     const secret = authenticator.generateSecret()
 
-    // set otp & qrcode
+    // set otpauth uri
     const otpauth = authenticator.keyuri(user, service, secret)
-    const qrCode = await generateQRCode(otpauth)
 
     // save to database
     const twoFa = await TwoFa.create({ userAppId: userApp.id, user, service, secret })
+
+    // generate qrcode with additional params
+    const qrCode = await generateQRCode(`${otpauth}&referenceId=${twoFa.referenceId}`)
 
     this.response('User role created successfully', {
       referenceId: twoFa.referenceId,
