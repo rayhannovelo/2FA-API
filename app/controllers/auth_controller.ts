@@ -7,7 +7,9 @@ import BaseController from '#controllers/base_controller'
 import User from '#models/user'
 import { uniqueRule } from '#rules/unique'
 import { verifyPasswordRule } from '#rules/verify_password'
+import env from '#start/env'
 import fs from 'node:fs'
+import { OAuth2Client } from 'google-auth-library'
 
 export default class AuthController extends BaseController {
   async login({ request }: HttpContext) {
@@ -41,6 +43,86 @@ export default class AuthController extends BaseController {
       this.response('Login successfully', { user, user_token: token })
     } catch (error: any) {
       this.responseError('Invalid credentials', 400)
+    }
+  }
+
+  async googleSignIn({ request }: HttpContext) {
+    const payload = request.body()
+    const validator = vine.compile(
+      vine.object({
+        idToken: vine.string(),
+        googleId: vine.string(),
+        platform: vine.string().in(['android', 'ios']),
+      })
+    )
+    const output = await validator.validate(payload)
+
+    try {
+      const client = new OAuth2Client()
+      const ticket = await client.verifyIdToken({
+        idToken: output.idToken,
+        audience:
+          output.platform === 'android'
+            ? env.get('GOOGLE_ANDROID_CLIENT_ID')
+            : env.get('GOOGLE_IOS_CLIENT_ID'),
+      })
+      const googlePayload = ticket.getPayload()
+
+      const validatorGooglePayload = vine.compile(
+        vine.object({
+          name: vine.string(),
+          photo: vine.string(),
+          googleId: vine
+            .string()
+            .use(
+              uniqueRule({
+                table: 'users',
+                column: 'google_id',
+                except: output.googleId,
+                exceptColumn: 'google_id',
+              })
+            )
+            .optional(),
+          email: vine
+            .string()
+            .email()
+            .use(
+              uniqueRule({
+                table: 'users',
+                column: 'email',
+                except: googlePayload?.email,
+                exceptColumn: 'email',
+              })
+            ),
+        })
+      )
+      const outputGoogle = await validatorGooglePayload.validate({
+        googleId: output.googleId,
+        photo: googlePayload?.picture,
+        ...googlePayload,
+      })
+
+      // get temp user
+      const tempUser = await User.findBy('email', outputGoogle.email)
+
+      // create or update
+      const user = tempUser
+        ? await tempUser?.merge(outputGoogle).save()
+        : await User.create({
+            userRoleId: 3,
+            userStatusId: 1,
+            username: outputGoogle.email,
+            ...outputGoogle,
+          })
+
+      // create token
+      const token = await User.accessTokens.create(user, ['*'])
+
+      await user.load('user_role')
+      await user.load('user_status')
+      this.response('Login successfully', { user, user_token: token })
+    } catch (error) {
+      this.responseError(error.message, 401)
     }
   }
 

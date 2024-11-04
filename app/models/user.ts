@@ -26,6 +26,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare userStatusId: number
 
   @column()
+  declare googleId: string | null
+
+  @column()
   declare username: string
 
   @column({ serializeAs: null })

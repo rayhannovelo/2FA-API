@@ -20,6 +20,7 @@ export default class extends BaseSchema {
         .references('user_statuses.id')
         .onDelete('RESTRICT')
         .onUpdate('CASCADE')
+      table.string('google_id').unique()
       table.string('username').notNullable().unique()
       table.string('password')
       table.string('name').notNullable()

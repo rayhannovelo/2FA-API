@@ -31,6 +31,7 @@ router
 
     // auth, generate token
     router.post('/auth', [AuthController, 'login'])
+    router.post('/auth/google-sign-in', [AuthController, 'googleSignIn'])
 
     router
       .group(() => {
