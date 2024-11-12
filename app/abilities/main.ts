@@ -37,7 +37,7 @@ export const manage2FA = Bouncer.ability((user: User) => {
 })
 
 export const manageUser2FA = Bouncer.ability((user: User) => {
-  const allowUserRole = [ADMIN, TWO_FA_APP, AUTHENTICATOR]
+  const allowUserRole = [AUTHENTICATOR]
 
   if (allowUserRole.includes(user.userRoleId)) {
     return true
