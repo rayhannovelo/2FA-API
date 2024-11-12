@@ -9,6 +9,7 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import UserRole from '#models/user_role'
 import UserStatus from '#models/user_status'
 import Post from '#models/post'
+import TwoFa from '#models/two_fa'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['username'],
@@ -71,6 +72,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => Post)
   declare posts: HasMany<typeof Post>
+
+  @hasMany(() => TwoFa)
+  declare twoFas: HasMany<typeof TwoFa>
 
   static accessTokens = DbAccessTokensProvider.forModel(User, {
     expiresIn: '30 days',

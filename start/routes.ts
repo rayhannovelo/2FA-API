@@ -11,13 +11,14 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
 
 // bouncer
-import { manageUser, manage2FA } from '#abilities/main'
+import { manageUser, manage2FA, manageUser2FA } from '#abilities/main'
 
 const AuthController = () => import('#controllers/auth_controller')
 const UsersController = () => import('#controllers/users_controller')
 const UserRolesController = () => import('#controllers/user_roles_controller')
 const UserStatusesController = () => import('#controllers/user_statuses_controller')
 const TwoFaController = () => import('#controllers/two_fa_controller')
+const UserTwoFaController = () => import('#controllers/user_two_fa_controller')
 
 router.get('/', ({ response }) => {
   response.redirect().toPath('/api')
@@ -73,6 +74,15 @@ router
             router.post('/2fa/verify-token', [TwoFaController, 'verifyToken'])
           })
           .use(middleware.bouncer(manage2FA))
+
+        router
+          .group(() => {
+            router.get('/user-2fas', [UserTwoFaController, 'index'])
+            router.post('/user-2fas', [UserTwoFaController, 'store'])
+            router.post('/user-2fas/sync', [UserTwoFaController, 'sync'])
+            router.delete('/user-2fas/:id', [UserTwoFaController, 'destroy'])
+          })
+          .use(middleware.bouncer(manageUser2FA))
       })
       .use(middleware.auth())
   })

@@ -35,3 +35,13 @@ export const manage2FA = Bouncer.ability((user: User) => {
 
   return AuthorizationResponse.deny('Unauthorized action', 403)
 })
+
+export const manageUser2FA = Bouncer.ability((user: User) => {
+  const allowUserRole = [ADMIN, TWO_FA_APP, AUTHENTICATOR]
+
+  if (allowUserRole.includes(user.userRoleId)) {
+    return true
+  }
+
+  return AuthorizationResponse.deny('Unauthorized action', 403)
+})
