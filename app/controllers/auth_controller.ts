@@ -47,6 +47,7 @@ export default class AuthController extends BaseController {
   }
 
   async googleSignIn({ request }: HttpContext) {
+    console.log('--- GOOGLE SIGN IN ---')
     const payload = request.body()
     const validator = vine.compile(
       vine.object({
@@ -61,10 +62,11 @@ export default class AuthController extends BaseController {
       const client = new OAuth2Client()
       const ticket = await client.verifyIdToken({
         idToken: output.idToken,
-        audience:
-          output.platform === 'android'
-            ? env.get('GOOGLE_CLIENT_ID_WEB')
-            : env.get('GOOGLE_CLIENT_ID_IOS'),
+        audience: [
+          env.get('GOOGLE_CLIENT_ID_WEB', ''),
+          env.get('GOOGLE_CLIENT_ID_ANDROID', ''),
+          env.get('GOOGLE_CLIENT_ID_IOS', ''),
+        ],
       })
       const googlePayload = ticket.getPayload()
 
