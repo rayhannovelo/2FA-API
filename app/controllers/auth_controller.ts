@@ -63,8 +63,8 @@ export default class AuthController extends BaseController {
         idToken: output.idToken,
         audience:
           output.platform === 'android'
-            ? env.get('GOOGLE_ANDROID_CLIENT_ID')
-            : env.get('GOOGLE_IOS_CLIENT_ID'),
+            ? env.get('GOOGLE_CLIENT_ID_WEB')
+            : env.get('GOOGLE_CLIENT_ID_IOS'),
       })
       const googlePayload = ticket.getPayload()
 
