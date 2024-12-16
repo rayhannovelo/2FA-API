@@ -56,7 +56,7 @@ export default class UserTwoFaController extends BaseController {
       twoFaId: twoFas.id,
     })
 
-    this.response('Token synced successfully')
+    this.response('Token created successfully')
   }
 
   /**
