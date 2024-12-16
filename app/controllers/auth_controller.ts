@@ -47,7 +47,6 @@ export default class AuthController extends BaseController {
   }
 
   async googleSignIn({ request }: HttpContext) {
-    console.log('--- GOOGLE SIGN IN ---')
     const payload = request.body()
     const validator = vine.compile(
       vine.object({
